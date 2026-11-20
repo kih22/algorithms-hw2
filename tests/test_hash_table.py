@@ -4,6 +4,17 @@ from src.hash_table import HashTable
 
 
 class HashTableTests(unittest.TestCase):
+    def test_empty_table_and_empty_string_key(self):
+        table = HashTable()
+        self.assertEqual(len(table), 0)
+        self.assertEqual(table.items(), [])
+        self.assertNotIn("", table)
+
+        table[""] = "empty key"
+        self.assertEqual(table[""], "empty key")
+        self.assertIn("", table)
+        self.assertEqual(len(table), 1)
+
     def test_insert_lookup_update_and_items(self):
         table = HashTable()
         table["first"] = 1
@@ -60,7 +71,13 @@ class HashTableTests(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             table[1] = "not a string key"
-        for capacity in (0, -1, True):
+        with self.assertRaises(TypeError):
+            _ = table[1]
+        with self.assertRaises(TypeError):
+            del table[1]
+        with self.assertRaises(TypeError):
+            _ = 1 in table
+        for capacity in (0, -1, True, 1.5, "1"):
             with self.subTest(capacity=capacity), self.assertRaises(ValueError):
                 HashTable(capacity=capacity)
 
