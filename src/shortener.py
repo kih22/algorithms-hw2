@@ -4,12 +4,13 @@ from urllib.parse import urlsplit
 
 from src.base62 import encode
 from src.hash_table import HashTable
+from src.linear_probing import LinearProbingHashTable
 
 
 class Shortener:
     def __init__(
         self,
-        table_type: type[HashTable] = HashTable,
+        table_type: type[HashTable] | type[LinearProbingHashTable] = HashTable,
         table_capacity: int = 1024,
     ):
         self.table = table_type(capacity=table_capacity)

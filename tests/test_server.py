@@ -90,6 +90,13 @@ class ServerTests(unittest.TestCase):
         self.assertIn("Horner 해시 계산 보기", page)
         self.assertIn("ord(", page)
         self.assertIn("버킷 인덱스", page)
+        self.assertIn("선형 탐지 테이블", page)
+        self.assertIn("조회 시 확인한 칸", page)
+
+        status, _, linear_page = self.request("GET", "/linear")
+        self.assertEqual(status, 200)
+        self.assertIn("Horner 해시와 탐지 경로 보기", linear_page)
+        self.assertIn("시작 칸", linear_page)
 
     def test_server_defaults_to_ten_buckets(self):
         server = ShortenerServer(("127.0.0.1", 0))

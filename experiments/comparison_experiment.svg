@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="650" viewBox="0 0 980 650">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490" y="27" text-anchor="middle" font-size="18">체이닝과 선형 탐지 탐색 비용 비교</text>
+<path d="M 88 445.0 H 908" stroke="#ddd"/>
+<text x="76" y="449.0" text-anchor="end" font-size="12">0</text>
+<path d="M 88 399.1 H 908" stroke="#ddd"/>
+<text x="76" y="403.1" text-anchor="end" font-size="12">6</text>
+<path d="M 88 353.2 H 908" stroke="#ddd"/>
+<text x="76" y="357.2" text-anchor="end" font-size="12">12</text>
+<path d="M 88 307.4 H 908" stroke="#ddd"/>
+<text x="76" y="311.4" text-anchor="end" font-size="12">18</text>
+<path d="M 88 261.5 H 908" stroke="#ddd"/>
+<text x="76" y="265.5" text-anchor="end" font-size="12">24</text>
+<path d="M 88 215.6 H 908" stroke="#ddd"/>
+<text x="76" y="219.6" text-anchor="end" font-size="12">30</text>
+<path d="M 88 169.7 H 908" stroke="#ddd"/>
+<text x="76" y="173.7" text-anchor="end" font-size="12">36</text>
+<path d="M 88 123.8 H 908" stroke="#ddd"/>
+<text x="76" y="127.8" text-anchor="end" font-size="12">42</text>
+<path d="M 88 77.9 H 908" stroke="#ddd"/>
+<text x="76" y="81.9" text-anchor="end" font-size="12">48</text>
+<path d="M 88.0 55 V 445" stroke="#eee"/>
+<text x="88.0" y="465" text-anchor="middle" font-size="12">0.0</text>
+<path d="M 179.1 55 V 445" stroke="#eee"/>
+<text x="179.1" y="465" text-anchor="middle" font-size="12">0.1</text>
+<path d="M 270.2 55 V 445" stroke="#eee"/>
+<text x="270.2" y="465" text-anchor="middle" font-size="12">0.2</text>
+<path d="M 361.3 55 V 445" stroke="#eee"/>
+<text x="361.3" y="465" text-anchor="middle" font-size="12">0.3</text>
+<path d="M 452.4 55 V 445" stroke="#eee"/>
+<text x="452.4" y="465" text-anchor="middle" font-size="12">0.4</text>
+<path d="M 543.6 55 V 445" stroke="#eee"/>
+<text x="543.6" y="465" text-anchor="middle" font-size="12">0.5</text>
+<path d="M 634.7 55 V 445" stroke="#eee"/>
+<text x="634.7" y="465" text-anchor="middle" font-size="12">0.6</text>
+<path d="M 725.8 55 V 445" stroke="#eee"/>
+<text x="725.8" y="465" text-anchor="middle" font-size="12">0.7</text>
+<path d="M 816.9 55 V 445" stroke="#eee"/>
+<text x="816.9" y="465" text-anchor="middle" font-size="12">0.8</text>
+<path d="M 908.0 55 V 445" stroke="#eee"/>
+<text x="908.0" y="465" text-anchor="middle" font-size="12">0.9</text>
+<path d="M 88 55 V 445 H 908" fill="none" stroke="#333"/>
+<text x="498.0" y="489" text-anchor="middle" font-size="14">적재율 α</text>
+<text x="20" y="250.0" text-anchor="middle" font-size="14" transform="rotate(-90 20 250.0)">평균 탐지 횟수</text>
+<polyline points="179.0,437.1 270.3,436.5 361.4,436.2 452.4,435.8 543.4,435.4 634.7,435.0 725.8,434.6 816.8,434.3 908.1,433.9" fill="none" stroke="#1769aa" stroke-width="2"/>
+<path d="M 88 517 h 24" stroke="#1769aa" stroke-width="2"/>
+<text x="120" y="521" font-size="12">체이닝 성공 실측</text>
+<polyline points="179.0,437.0 270.3,436.6 361.4,436.2 452.4,435.8 543.4,435.4 634.7,435.1 725.8,434.7 816.8,434.3 908.1,433.9" fill="none" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 498 517 h 24" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="530" y="521" font-size="12">체이닝 성공 이론 1+α/2</text>
+<polyline points="179.0,444.3 270.3,443.5 361.4,442.7 452.4,442.0 543.4,441.1 634.7,440.3 725.8,439.6 816.8,438.8 908.1,438.1" fill="none" stroke="#c62828" stroke-width="2"/>
+<path d="M 88 542 h 24" stroke="#c62828" stroke-width="2"/>
+<text x="120" y="546" font-size="12">체이닝 실패 실측</text>
+<polyline points="179.0,444.2 270.3,443.5 361.4,442.7 452.4,441.9 543.4,441.2 634.7,440.4 725.8,439.6 816.8,438.9 908.1,438.1" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 498 542 h 24" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="530" y="546" font-size="12">체이닝 실패 이론 α</text>
+<polyline points="179.0,437.0 270.3,436.2 361.4,435.6 452.4,434.7 543.4,433.4 634.7,430.8 725.8,428.0 816.8,421.3 908.1,400.3" fill="none" stroke="#2e7d32" stroke-width="2"/>
+<path d="M 88 567 h 24" stroke="#2e7d32" stroke-width="2"/>
+<text x="120" y="571" font-size="12">선형 탐지 성공 실측</text>
+<polyline points="179.0,436.9 270.3,436.4 361.4,435.7 452.4,434.8 543.4,433.5 634.7,431.6 725.8,428.4 816.8,422.1 908.1,402.9" fill="none" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 498 567 h 24" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="530" y="571" font-size="12">선형 탐지 성공 이론</text>
+<polyline points="179.0,436.5 270.3,435.2 361.4,433.3 452.4,430.5 543.4,425.3 634.7,414.9 725.8,398.1 816.8,345.3 908.1,95.9" fill="none" stroke="#8e24aa" stroke-width="2"/>
+<path d="M 88 592 h 24" stroke="#8e24aa" stroke-width="2"/>
+<text x="120" y="596" font-size="12">선형 탐지 실패 실측</text>
+<polyline points="179.0,436.5 270.3,435.2 361.4,433.4 452.4,430.6 543.4,425.9 634.7,417.3 725.8,398.7 816.8,345.7 908.1,58.3" fill="none" stroke="#8e24aa" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 498 592 h 24" stroke="#8e24aa" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="530" y="596" font-size="12">선형 탐지 실패 이론</text>
+<text x="88" y="638" font-size="11">버킷 4093개 · 적재율당 같은 URL 5회 · 시드 2026 · 체이닝/선형 탐지 동시 측정</text>
+</svg>
