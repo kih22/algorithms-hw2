@@ -20,7 +20,7 @@
 | 파일 | 하는 일 |
 | --- | --- |
 | `SPEC.md` | 명세 틀. 에이전트가 초안을 쓰고 **본인이 고칩니다** |
-| `src/` · `tests/` · `experiments/` | 비어 있습니다. 수업에서 채웁니다 |
+| `src/` · `tests/` · `experiments/` | 단축기, 해시 테이블, 웹 서비스, 테스트, 실험 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
 | `Makefile` | `make test` · `make serve` · `make experiment` |
 
@@ -39,6 +39,10 @@
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
 
 외부 라이브러리는 쓰지 않습니다. Python 표준 모듈만으로 충분합니다.
+
+`make serve`를 실행한 뒤 브라우저에서 `/`에 접속해 URL을 줄일 수 있습니다.
+`/table`에서는 현재 프로세스의 해시 테이블과 연결 리스트, Horner 계산 과정을 확인합니다.
+단축 URL 데이터는 메모리에만 저장되므로 서버를 다시 시작하면 사라집니다.
 
 ## 로컬에서 하기
 
