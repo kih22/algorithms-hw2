@@ -2,56 +2,115 @@
 
 import csv
 import random
+from math import ceil
 from pathlib import Path
 
 from src.hash_table import HashTable
 
-CAPACITY = 2003
-LOAD_FACTORS = tuple(round(step / 4, 2) for step in range(1, 17))
+CAPACITY = 4093
+TARGET_LOAD_FACTORS = tuple(step / 4 for step in range(1, 17))
 TRIALS = 5
 SEED = 2026
 OUTPUT_DIR = Path(__file__).parent
-_key_generator = random.Random(SEED)
-KEYS = [
-    f"url-{_key_generator.getrandbits(64):016x}"
-    for _ in range(round(4 * CAPACITY))
-]
+CSV_PATH = OUTPUT_DIR / "results.csv"
+SVG_PATH = OUTPUT_DIR / "probe_experiment.svg"
+MAX_ITEMS = round(4 * CAPACITY)
 
 
-def measure(load_factor: float) -> tuple[float, float]:
-    item_count = round(load_factor * CAPACITY)
-    keys = KEYS[:item_count]
-    successful_probes = []
-    unsuccessful_probes = []
+def make_urls(count: int, seed: int) -> list[str]:
+    """Create reproducible URL-shaped keys with randomized hosts."""
+    generator = random.Random(seed)
+    return [
+        f"https://{generator.getrandbits(64):016x}.example.test/record/{index:05d}"
+        for index in range(count)
+    ]
+
+
+URLS = make_urls(MAX_ITEMS, SEED)
+
+
+def measure(target_load_factor: float) -> tuple[float, int, float, float]:
+    item_count = round(target_load_factor * CAPACITY)
+    actual_load_factor = item_count / CAPACITY
+    keys = URLS[:item_count]
+    successful_probes = 0
+    unsuccessful_probes = 0
+    query_count = 0
 
     for trial in range(TRIALS):
         insertion_order = keys.copy()
         random.Random(SEED + trial).shuffle(insertion_order)
+
+        # HashTable has fixed capacity and never resizes, equivalent to max_load=None.
         table = HashTable(capacity=CAPACITY)
         for key in insertion_order:
             table[key] = key
 
-        successful_probes.extend(table.probe_count(key) for key in keys)
-        unsuccessful_probes.extend(
-            table.probe_count(f"missing-{trial}-{index:08d}")
-            for index in range(item_count)
+        successful_probes += sum(table.probe_count(key) for key in keys)
+        missing_urls = make_missing_urls(item_count, trial)
+        unsuccessful_probes += sum(
+            table.probe_count(url) for url in missing_urls
         )
+        query_count += item_count
 
     return (
-        sum(successful_probes) / len(successful_probes),
-        sum(unsuccessful_probes) / len(unsuccessful_probes),
+        actual_load_factor,
+        item_count,
+        successful_probes / query_count,
+        unsuccessful_probes / query_count,
     )
 
 
-def write_svg(rows: list[tuple[float, float, float]]) -> None:
-    width, height = 760, 520
-    left, top, plot_width, plot_height = 78, 40, 630, 360
+def make_missing_urls(count: int, trial: int) -> list[str]:
+    """Create absent URL keys from a host namespace not used by inserted URLs."""
+    generator = random.Random(SEED + 100 + trial)
+    return [
+        f"https://missing-{generator.getrandbits(64):016x}.example.test/query/{index:05d}"
+        for index in range(count)
+    ]
+
+
+def write_csv(rows: list[tuple[float, float, int, float, float]]) -> None:
+    with CSV_PATH.open("w", newline="", encoding="utf-8") as output:
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(
+            [
+                "target_load_factor",
+                "actual_load_factor",
+                "item_count",
+                "capacity",
+                "trials",
+                "successful_measured_nodes",
+                "successful_theory_nodes",
+                "unsuccessful_measured_nodes",
+                "unsuccessful_theory_nodes",
+            ]
+        )
+        for target_load, actual_load, item_count, successful, unsuccessful in rows:
+            writer.writerow(
+                [
+                    target_load,
+                    actual_load,
+                    item_count,
+                    CAPACITY,
+                    TRIALS,
+                    successful,
+                    1 + actual_load / 2,
+                    unsuccessful,
+                    actual_load,
+                ]
+            )
+
+
+def write_svg(rows: list[tuple[float, float, int, float, float]]) -> None:
+    width, height = 800, 570
+    left, top, plot_width, plot_height = 82, 52, 660, 350
     maximum = max(
-        actual
-        for row in rows
-        for actual in (row[1], row[2], 1 + row[0] / 2, row[0])
+        value
+        for _, load, _, successful, unsuccessful in rows
+        for value in (successful, unsuccessful, 1 + load / 2, load)
     )
-    y_max = max(1, int(maximum + 0.999))
+    y_max = max(1, ceil(maximum))
 
     def point(load: float, probes: float) -> tuple[float, float]:
         x = left + load / 4 * plot_width
@@ -59,22 +118,20 @@ def write_svg(rows: list[tuple[float, float, float]]) -> None:
         return x, y
 
     series = (
-        ("성공 실측", "#1769aa", 1),
-        ("성공 이론 1+α/2", "#1769aa", 0),
-        ("실패 실측", "#c62828", 2),
-        ("실패 이론 α", "#c62828", 3),
+        ("성공 실측", "#1769aa", [(row[1], row[3]) for row in rows], False),
+        (
+            "성공 이론 1+α/2",
+            "#1769aa",
+            [(row[1], 1 + row[1] / 2) for row in rows],
+            True,
+        ),
+        ("실패 실측", "#c62828", [(row[1], row[4]) for row in rows], False),
+        ("실패 이론 α", "#c62828", [(row[1], row[1]) for row in rows], True),
     )
-    data = {
-        0: [(row[0], row[1]) for row in rows],
-        1: [(row[0], 1 + row[0] / 2) for row in rows],
-        2: [(row[0], row[2]) for row in rows],
-        3: [(row[0], row[0]) for row in rows],
-    }
-
     pieces = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         '<rect width="100%" height="100%" fill="white"/>',
-        '<text x="380" y="24" text-anchor="middle" font-size="18">체이닝 해시 테이블 탐색 비용</text>',
+        '<text x="400" y="25" text-anchor="middle" font-size="18">체이닝 해시 테이블 탐색 비용</text>',
     ]
     for tick in range(y_max + 1):
         y = top + plot_height - tick / y_max * plot_height
@@ -96,15 +153,15 @@ def write_svg(rows: list[tuple[float, float, float]]) -> None:
             f'<text x="18" y="{top + plot_height / 2}" text-anchor="middle" font-size="14" transform="rotate(-90 18 {top + plot_height / 2})">평균 노드 탐색 횟수</text>',
         ]
     )
-    for label, color, index in series:
+    for index, (label, color, values, dashed) in enumerate(series):
         coordinates = " ".join(
-            f"{x:.1f},{y:.1f}" for x, y in (point(*pair) for pair in data[index])
+            f"{x:.1f},{y:.1f}" for x, y in (point(*pair) for pair in values)
         )
-        dash = ' stroke-dasharray="6 4"' if index in (1, 3) else ""
+        dash = ' stroke-dasharray="6 4"' if dashed else ""
         pieces.append(
             f'<polyline points="{coordinates}" fill="none" stroke="{color}" stroke-width="2"{dash}/>'
         )
-        legend_x = left + (index % 2) * 250
+        legend_x = left + (index % 2) * 300
         legend_y = top + plot_height + 78 + (index // 2) * 22
         pieces.append(
             f'<path d="M {legend_x} {legend_y - 4} h 24" stroke="{color}" stroke-width="2"{dash}/>'
@@ -112,41 +169,50 @@ def write_svg(rows: list[tuple[float, float, float]]) -> None:
         pieces.append(
             f'<text x="{legend_x + 32}" y="{legend_y}" font-size="12">{label}</text>'
         )
+    pieces.append(
+        f'<text x="{left}" y="{height - 12}" font-size="11">버킷 {CAPACITY}개 · 적재율당 {TRIALS}회 · 시드 {SEED} · 재현 가능한 무작위 URL</text>'
+    )
     pieces.append("</svg>")
-    (OUTPUT_DIR / "probe_experiment.svg").write_text("\n".join(pieces), encoding="utf-8")
+    SVG_PATH.write_text("\n".join(pieces), encoding="utf-8")
 
 
 def main() -> None:
     rows = []
-    for load_factor in LOAD_FACTORS:
-        successful, unsuccessful = measure(load_factor)
-        rows.append((load_factor, successful, unsuccessful))
-
-    csv_path = OUTPUT_DIR / "probe_results.csv"
-    with csv_path.open("w", newline="", encoding="utf-8") as output:
-        writer = csv.writer(output)
-        writer.writerow(
-            [
-                "load_factor",
-                "successful_measured",
-                "successful_theory",
-                "unsuccessful_measured",
-                "unsuccessful_theory",
-            ]
+    for target_load_factor in TARGET_LOAD_FACTORS:
+        actual_load, item_count, successful, unsuccessful = measure(
+            target_load_factor
         )
-        for load, successful, unsuccessful in rows:
-            writer.writerow(
-                [load, successful, 1 + load / 2, unsuccessful, load]
-            )
+        rows.append(
+            (target_load_factor, actual_load, item_count, successful, unsuccessful)
+        )
 
+    write_csv(rows)
     write_svg(rows)
-    print(" α    성공 실측  성공 이론  실패 실측  실패 이론")
-    for load, successful, unsuccessful in rows:
+
+    print("목표 α  실제 α    항목 수  성공 실측  성공 이론  실패 실측  실패 이론")
+    for target_load, actual_load, item_count, successful, unsuccessful in rows:
         print(
-            f"{load:>3.2f}  {successful:>8.3f}  {1 + load / 2:>8.3f}"
-            f"  {unsuccessful:>8.3f}  {load:>8.3f}"
+            f"{target_load:>5.2f}  {actual_load:>6.3f}  {item_count:>8}"
+            f"  {successful:>8.3f}  {1 + actual_load / 2:>8.3f}"
+            f"  {unsuccessful:>8.3f}  {actual_load:>8.3f}"
         )
-    print(f"\nWrote {csv_path.name} and probe_experiment.svg")
+
+    max_success_error = max(
+        abs(successful - (1 + actual_load / 2))
+        for _, actual_load, _, successful, _ in rows
+    )
+    max_failure_error = max(
+        abs(unsuccessful - actual_load)
+        for _, actual_load, _, _, unsuccessful in rows
+    )
+    print(
+        "\n최대 절대 오차: "
+        f"성공 {max_success_error:.3f}, 실패 {max_failure_error:.3f}"
+    )
+    print(
+        "작은 차이는 유한한 URL 표본과 버킷별 충돌 분포에 따른 측정 변동입니다."
+    )
+    print(f"Wrote {CSV_PATH.name} and {SVG_PATH.name}")
 
 
 if __name__ == "__main__":
