@@ -41,6 +41,16 @@ class HashTableTests(unittest.TestCase):
         self.assertIn("none", table)
         self.assertIsNone(table["none"])
 
+    def test_probe_count_matches_chain_position_or_full_failed_scan(self):
+        table = HashTable(capacity=1)
+        table["first"] = 1
+        table["second"] = 2
+        table["third"] = 3
+
+        self.assertEqual(table.probe_count("third"), 1)
+        self.assertEqual(table.probe_count("first"), 3)
+        self.assertEqual(table.probe_count("missing"), 3)
+
     def test_delete_last_item_and_invalid_inputs(self):
         table = HashTable()
         table["only"] = 1
