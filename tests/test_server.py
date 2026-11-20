@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import http.client
 import threading
 import unittest
@@ -140,6 +141,120 @@ class ServerTests(unittest.TestCase):
 
         self.assertEqual(status, 507)
         self.assertIn("가득 찼습니다", page)
+
+
+class SelectableStrategyTests(unittest.TestCase):
+    def setUp(self):
+        self.server = ShortenerServer(
+            ("127.0.0.1", 0),
+            strategy="selectable",
+        )
+        self.thread = threading.Thread(target=self.server.serve_forever)
+        self.thread.start()
+        self.port = self.server.server_address[1]
+
+    def tearDown(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join()
+
+    def request(self, method, path, body=None, headers=None):
+        connection = http.client.HTTPConnection("127.0.0.1", self.port)
+        connection.request(method, path, body=body, headers=headers or {})
+        response = connection.getresponse()
+        result = response.status, response.getheaders(), response.read().decode("utf-8")
+        connection.close()
+        return result
+
+    def shorten(self, url, strategy):
+        return self.request(
+            "POST",
+            "/shorten",
+            urlencode({"url": url, "strategy": strategy}),
+            {"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+    def test_form_selects_method_and_both_tables_share_short_links(self):
+        status, _, page = self.request("GET", "/")
+        self.assertEqual(status, 200)
+        self.assertIn('name="strategy"', page)
+        self.assertIn('value="chaining"', page)
+        self.assertIn('value="linear"', page)
+
+        status, _, page = self.shorten("https://example.com/first", "chaining")
+        self.assertEqual(status, 200)
+        self.assertIn("선택한 방식: 개별 체이닝", page)
+        self.assertIn('href="/0"', page)
+
+        status, _, page = self.shorten("https://example.com/first", "linear")
+        self.assertEqual(status, 200)
+        self.assertIn('href="/0"', page)
+        status, _, page = self.shorten("https://example.com/second", "linear")
+        self.assertEqual(status, 200)
+        self.assertIn('href="/1"', page)
+
+        chaining = self.server.shortener_for("chaining")
+        linear = self.server.shortener_for("linear")
+        self.assertEqual(
+            dict(chaining.table.items()),
+            dict(linear.table.items()),
+        )
+        self.assertEqual(chaining.expand("1"), "https://example.com/second")
+
+        status, headers, _ = self.request("GET", "/1")
+        self.assertEqual(status, 302)
+        self.assertEqual(
+            dict(headers)["Location"],
+            "https://example.com/second",
+        )
+
+    def test_table_view_switches_between_selected_methods(self):
+        self.shorten("https://example.com/chaining", "chaining")
+        self.shorten("https://example.com/linear", "linear")
+
+        status, _, chaining_page = self.request(
+            "GET",
+            "/table?strategy=chaining",
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("연결 리스트 (앞에서 뒤로)", chaining_page)
+        self.assertNotIn("<h2>선형 탐지 테이블</h2>", chaining_page)
+        self.assertIn("/table?strategy=linear", chaining_page)
+
+        status, _, linear_page = self.request(
+            "GET",
+            "/table?strategy=linear",
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("<h2>선형 탐지 테이블</h2>", linear_page)
+        self.assertIn("조회 시 확인한 칸", linear_page)
+        self.assertNotIn("연결 리스트 (앞에서 뒤로)", linear_page)
+
+    def test_unknown_selected_method_is_rejected(self):
+        status, _, page = self.shorten("https://example.com", "unknown")
+        self.assertEqual(status, 400)
+        self.assertIn("해시 방식을 하나 선택", page)
+
+    def test_concurrent_posts_keep_both_tables_in_sync(self):
+        requests = [
+            (
+                f"https://example.com/concurrent-{index}",
+                "chaining" if index % 2 == 0 else "linear",
+            )
+            for index in range(8)
+        ]
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            results = list(executor.map(lambda item: self.shorten(*item), requests))
+
+        self.assertTrue(all(status == 200 for status, _, _ in results))
+        chaining = self.server.shortener_for("chaining")
+        linear = self.server.shortener_for("linear")
+        chained_items = dict(chaining.table.items())
+        self.assertEqual(chained_items, dict(linear.table.items()))
+        for url, code in chaining.table.items():
+            status, headers, _ = self.request("GET", f"/{code}")
+            self.assertEqual(status, 302)
+            self.assertEqual(dict(headers)["Location"], url)
 
 
 if __name__ == "__main__":

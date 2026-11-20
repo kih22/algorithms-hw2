@@ -11,7 +11,7 @@
 PORT ?= 8000
 LINEAR_PORT ?= 8001
 
-.PHONY: all test serve serve-linear experiment compare clean
+.PHONY: all test serve serve-linear serve-selectable experiment compare clean
 
 all: test
 
@@ -23,6 +23,9 @@ serve:
 
 serve-linear:
 	@python3 -m src.server --port $(LINEAR_PORT) --strategy linear
+
+serve-selectable:
+	@python3 -m src.server --port $(LINEAR_PORT) --strategy selectable
 
 experiment:
 	@PYTHONPATH=. python3 experiments/probe_experiment.py
