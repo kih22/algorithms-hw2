@@ -20,6 +20,14 @@ class ShortenerTests(unittest.TestCase):
         self.assertEqual(shortener.shorten("https://example.com/path"), code)
         self.assertEqual(shortener.expand(code), "https://example.com/path")
 
+    def test_encodes_ids_beyond_single_base62_digit(self):
+        shortener = Shortener()
+        for index in range(63):
+            code = shortener.shorten(f"https://example.com/{index}")
+
+        self.assertEqual(code, "10")
+        self.assertEqual(shortener.expand(code), "https://example.com/62")
+
     def test_rejects_malformed_urls_and_unknown_codes(self):
         shortener = Shortener()
         for url in (
