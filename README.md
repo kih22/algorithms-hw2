@@ -20,7 +20,7 @@
 | 파일 | 하는 일 |
 | --- | --- |
 | `SPEC.md` | 명세 틀. 에이전트가 초안을 쓰고 **본인이 고칩니다** |
-| `src/` · `tests/` · `experiments/` | 비어 있습니다. 수업에서 채웁니다 |
+| `src/` · `tests/` · `experiments/` | 단축기, 해시 테이블, 웹 서비스, 테스트, 실험 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
 | `Makefile` | `make test` · `make serve` · `make experiment` |
 
@@ -35,10 +35,21 @@
 | --- | --- |
 | 테스트 | `make test` |
 | 웹 서버 (포트 8000) | `make serve` |
+| 체이닝/선형 탐지 선택 서버 (포트 8001) | `make serve-selectable` |
 | 충돌 실험 | `make experiment` |
+| 체이닝·선형 탐지 비교 | `make compare` |
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
 
 외부 라이브러리는 쓰지 않습니다. Python 표준 모듈만으로 충분합니다.
+
+`make serve`를 실행한 뒤 브라우저에서 `/`에 접속해 URL을 줄일 수 있습니다.
+`/table`에서는 시연용 10개 버킷의 현재 해시 테이블과 연결 리스트, Horner 계산 과정을 확인합니다.
+`http://` 또는 `https://`를 빼고 도메인만 입력해도 `https://`를 붙여 단축합니다.
+단축 URL 데이터는 메모리에만 저장되므로 서버를 다시 시작하면 사라집니다.
+
+`make serve-selectable`을 실행하면 포트 8001에서 개별 체이닝과 선형 탐지 중
+하나를 선택할 수 있습니다. 짧은 링크가 어느 표를 선택해도 동작하도록 두 표는
+같은 URL과 코드를 유지합니다.
 
 ## 로컬에서 하기
 
