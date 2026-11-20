@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qsl, unquote, urlsplit
 
 from src.hash_table import HashTable
+from src.linear_probing import LinearProbingHashTable
 from src.shortener import Shortener
 
 _DEFAULT_TABLE_CAPACITY = 10
@@ -96,12 +97,78 @@ def _table_page(shortener: Shortener) -> str:
             f'<tr><th class="bucket" scope="row">{index}</th>'
             f'<td class="bucket">{chain}</td></tr>'
         )
+    _, linear_content = _linear_table_view(shortener)
     content = f"""<p>버킷 수: {shortener.table.capacity} · 저장된 URL: {len(shortener.table)}</p>
 <table>
   <thead><tr><th scope="col">버킷</th><th scope="col">연결 리스트 (앞에서 뒤로)</th></tr></thead>
   <tbody>{''.join(rows)}</tbody>
-</table>"""
+</table>
+<p><a href="/linear">선형 탐지 표만 새 페이지에서 보기</a></p>
+{linear_content}"""
     return _page("현재 해시 테이블", content)
+
+
+def _linear_table_view(shortener: Shortener) -> tuple[LinearProbingHashTable[str], str]:
+    items = shortener.table.items()
+    capacity = max(shortener.table.capacity, len(items), 1)
+    table = LinearProbingHashTable[str](capacity=capacity)
+    for key, code in items:
+        table[key] = code
+
+    rows = []
+    for index, bucket in enumerate(table.buckets()):
+        if not bucket:
+            cell = '<span class="muted">(비어 있음)</span>'
+        else:
+            key, code = bucket[0]
+            accumulators, start = table.hash_calculation(key)
+            trace = table.probe_trace(key)
+            steps = []
+            previous = 0
+            for position, (character, accumulator) in enumerate(
+                zip(key, accumulators), start=1
+            ):
+                steps.append(
+                    "<li><code>"
+                    f"h{position} = 31 × {previous} + ord({html.escape(repr(character))}) "
+                    f"= {accumulator}"
+                    "</code></li>"
+                )
+                previous = accumulator
+            if not steps:
+                steps.append("<li>빈 문자열이므로 해시값은 0입니다.</li>")
+            inspected = " &rarr; ".join(str(slot) for slot in trace)
+            cell = f"""<div class="chain-node">
+  <div><strong>URL 키</strong>: <code>{html.escape(key)}</code></div>
+  <div><strong>짧은 코드</strong>: <code>{html.escape(code)}</code></div>
+  <div><strong>짧은 링크</strong>: <a href="/{html.escape(code)}">/{html.escape(code)}</a></div>
+  <details>
+    <summary>Horner 해시와 탐지 경로 보기</summary>
+    <ol>{''.join(steps)}</ol>
+    <p>시작 칸: 해시값 {previous} % 버킷 수 {table.capacity} = {start}</p>
+    <p>조회 시 확인한 칸: {inspected}</p>
+    <p>이 키는 칸 {index}에서 발견됩니다.</p>
+  </details>
+</div>"""
+        rows.append(
+            f'<tr><th class="bucket" scope="row">{index}</th>'
+            f'<td class="bucket">{cell}</td></tr>'
+        )
+
+    content = f"""<section>
+  <h2>선형 탐지 테이블</h2>
+  <p>칸 수: {table.capacity} · 저장된 URL: {len(table)}</p>
+  <table>
+    <thead><tr><th scope="col">칸</th><th scope="col">저장 내용과 탐색 근거</th></tr></thead>
+    <tbody>{''.join(rows)}</tbody>
+  </table>
+</section>"""
+    return table, content
+
+
+def _linear_table_page(shortener: Shortener) -> str:
+    _, content = _linear_table_view(shortener)
+    return _page("선형 탐지 테이블", f'<p><a href="/table">체이닝 표와 함께 보기</a></p>{content}')
 
 
 class ShortenerServer(ThreadingHTTPServer):
@@ -137,6 +204,9 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
             return
         if path == "/table":
             self._send_html(200, _table_page(self.server.shortener))
+            return
+        if path == "/linear":
+            self._send_html(200, _linear_table_page(self.server.shortener))
             return
 
         code = path.removeprefix("/")

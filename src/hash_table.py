@@ -5,6 +5,21 @@ from typing import Generic, TypeVar
 Value = TypeVar("Value")
 
 
+def _validate_key(key: str) -> None:
+    if not isinstance(key, str):
+        raise TypeError("key must be a string")
+
+
+def _horner_hash(key: str, capacity: int) -> tuple[list[int], int]:
+    _validate_key(key)
+    values = []
+    accumulator = 0
+    for character in key:
+        accumulator = accumulator * 31 + ord(character)
+        values.append(accumulator)
+    return values, accumulator % capacity
+
+
 class _Node(Generic[Value]):
     def __init__(self, key: str, value: Value, next_node: "_Node[Value] | None" = None):
         self.key = key
@@ -25,18 +40,11 @@ class HashTable(Generic[Value]):
 
     @staticmethod
     def _validate_key(key: str) -> None:
-        if not isinstance(key, str):
-            raise TypeError("key must be a string")
+        _validate_key(key)
 
     def hash_calculation(self, key: str) -> tuple[list[int], int]:
         """Return each Horner accumulator and the resulting bucket index."""
-        self._validate_key(key)
-        values = []
-        accumulator = 0
-        for character in key:
-            accumulator = accumulator * 31 + ord(character)
-            values.append(accumulator)
-        return values, accumulator % self.capacity
+        return _horner_hash(key, self.capacity)
 
     def _bucket_index(self, key: str) -> int:
         return self.hash_calculation(key)[1]
