@@ -203,7 +203,11 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
             self._send_html(200, _form_page())
             return
         if path == "/table":
-            self._send_html(200, _table_page(self.server.shortener))
+            if isinstance(self.server.shortener.table, LinearProbingHashTable):
+                document = _linear_table_page(self.server.shortener)
+            else:
+                document = _table_page(self.server.shortener)
+            self._send_html(200, document)
             return
         if path == "/linear":
             self._send_html(200, _linear_table_page(self.server.shortener))
@@ -264,6 +268,9 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
         except ValueError as error:
             self._send_html(400, _form_page(str(error)))
             return
+        except OverflowError:
+            self._send_html(507, _form_page("선형 탐지 테이블이 가득 찼습니다."))
+            return
 
         short_path = f"/{html.escape(code)}"
         original_url = html.escape(self.server.shortener.expand(code), quote=True)
@@ -278,6 +285,17 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
         self._send_html(200, _page("짧은 링크", content))
 
 
+def _make_shortener(strategy: str) -> Shortener:
+    if strategy == "linear":
+        return Shortener(
+            table_type=LinearProbingHashTable,
+            table_capacity=_DEFAULT_TABLE_CAPACITY,
+        )
+    if strategy == "chaining":
+        return Shortener(table_capacity=_DEFAULT_TABLE_CAPACITY)
+    raise ValueError(f"unknown hash table strategy: {strategy}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="URL 단축기 웹 서버")
     parser.add_argument(
@@ -286,9 +304,18 @@ def main() -> None:
         default=int(os.environ.get("PORT", "8000")),
         help="서버 포트 (기본값: PORT 환경 변수 또는 8000)",
     )
+    parser.add_argument(
+        "--strategy",
+        choices=("chaining", "linear"),
+        default="chaining",
+        help="해시 테이블 방식 (기본값: chaining)",
+    )
     args = parser.parse_args()
 
-    server = ShortenerServer(("0.0.0.0", args.port))
+    server = ShortenerServer(
+        ("0.0.0.0", args.port),
+        _make_shortener(args.strategy),
+    )
     print(f"URL 단축기 실행 중: http://0.0.0.0:{args.port}")
     try:
         server.serve_forever()

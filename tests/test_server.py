@@ -3,6 +3,7 @@ import threading
 import unittest
 from urllib.parse import urlencode
 
+from src.linear_probing import LinearProbingHashTable
 from src.server import ShortenerServer
 from src.shortener import Shortener
 
@@ -104,6 +105,41 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(server.shortener.table.capacity, 10)
         finally:
             server.server_close()
+
+    def test_linear_strategy_shows_only_the_linear_table(self):
+        self.server.shortener = Shortener(
+            table_type=LinearProbingHashTable,
+            table_capacity=1,
+        )
+        self.server.shortener.shorten("https://example.com/linear")
+
+        status, _, page = self.request("GET", "/table")
+        self.assertEqual(status, 200)
+        self.assertIn("선형 탐지 테이블", page)
+        self.assertIn("조회 시 확인한 칸", page)
+        self.assertNotIn("연결 리스트 (앞에서 뒤로)", page)
+        self.assertNotIn("Horner 해시 계산 보기", page)
+
+    def test_linear_server_reports_a_full_table(self):
+        self.server.shortener = Shortener(
+            table_type=LinearProbingHashTable,
+            table_capacity=1,
+        )
+        self.request(
+            "POST",
+            "/shorten",
+            urlencode({"url": "https://example.com/first"}),
+            {"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        status, _, page = self.request(
+            "POST",
+            "/shorten",
+            urlencode({"url": "https://example.com/second"}),
+            {"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        self.assertEqual(status, 507)
+        self.assertIn("가득 찼습니다", page)
 
 
 if __name__ == "__main__":

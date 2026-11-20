@@ -9,8 +9,9 @@
 # 외부 라이브러리를 쓰지 않는다. Python 표준 모듈만으로 돈다.
 
 PORT ?= 8000
+LINEAR_PORT ?= 8001
 
-.PHONY: all test serve experiment compare clean
+.PHONY: all test serve serve-linear experiment compare clean
 
 all: test
 
@@ -19,6 +20,9 @@ test:
 
 serve:
 	@python3 -m src.server --port $(PORT)
+
+serve-linear:
+	@python3 -m src.server --port $(LINEAR_PORT) --strategy linear
 
 experiment:
 	@PYTHONPATH=. python3 experiments/probe_experiment.py
