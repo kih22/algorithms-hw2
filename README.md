@@ -35,6 +35,7 @@
 | --- | --- |
 | 테스트 | `make test` |
 | 웹 서버 (포트 8000) | `make serve` |
+| 선형 탐지 전용 서버 (포트 8001) | `make serve-linear` |
 | 충돌 실험 | `make experiment` |
 | 체이닝·선형 탐지 비교 | `make compare` |
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
