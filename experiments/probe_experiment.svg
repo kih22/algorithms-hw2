@@ -1,49 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="520" viewBox="0 0 760 520">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="570" viewBox="0 0 800 570">
 <rect width="100%" height="100%" fill="white"/>
-<text x="380" y="24" text-anchor="middle" font-size="18">체이닝 해시 테이블 탐색 비용</text>
-<path d="M 78 400.0 H 708" stroke="#ddd"/>
-<text x="66" y="404.0" text-anchor="end" font-size="12">0</text>
-<path d="M 78 328.0 H 708" stroke="#ddd"/>
-<text x="66" y="332.0" text-anchor="end" font-size="12">1</text>
-<path d="M 78 256.0 H 708" stroke="#ddd"/>
-<text x="66" y="260.0" text-anchor="end" font-size="12">2</text>
-<path d="M 78 184.0 H 708" stroke="#ddd"/>
-<text x="66" y="188.0" text-anchor="end" font-size="12">3</text>
-<path d="M 78 112.0 H 708" stroke="#ddd"/>
-<text x="66" y="116.0" text-anchor="end" font-size="12">4</text>
-<path d="M 78 40.0 H 708" stroke="#ddd"/>
-<text x="66" y="44.0" text-anchor="end" font-size="12">5</text>
-<path d="M 78.0 40 V 400" stroke="#eee"/>
-<text x="78.0" y="420" text-anchor="middle" font-size="12">0.0</text>
-<path d="M 156.8 40 V 400" stroke="#eee"/>
-<text x="156.8" y="420" text-anchor="middle" font-size="12">0.5</text>
-<path d="M 235.5 40 V 400" stroke="#eee"/>
-<text x="235.5" y="420" text-anchor="middle" font-size="12">1.0</text>
-<path d="M 314.2 40 V 400" stroke="#eee"/>
-<text x="314.2" y="420" text-anchor="middle" font-size="12">1.5</text>
-<path d="M 393.0 40 V 400" stroke="#eee"/>
-<text x="393.0" y="420" text-anchor="middle" font-size="12">2.0</text>
-<path d="M 471.8 40 V 400" stroke="#eee"/>
-<text x="471.8" y="420" text-anchor="middle" font-size="12">2.5</text>
-<path d="M 550.5 40 V 400" stroke="#eee"/>
-<text x="550.5" y="420" text-anchor="middle" font-size="12">3.0</text>
-<path d="M 629.2 40 V 400" stroke="#eee"/>
-<text x="629.2" y="420" text-anchor="middle" font-size="12">3.5</text>
-<path d="M 708.0 40 V 400" stroke="#eee"/>
-<text x="708.0" y="420" text-anchor="middle" font-size="12">4.0</text>
-<path d="M 78 40 V 400 H 708" fill="none" stroke="#333"/>
-<text x="393.0" y="448" text-anchor="middle" font-size="14">적재율 α</text>
-<text x="18" y="220.0" text-anchor="middle" font-size="14" transform="rotate(-90 18 220.0)">평균 노드 탐색 횟수</text>
-<polyline points="117.4,319.0 156.8,310.0 196.1,301.0 235.5,292.0 274.9,283.0 314.2,274.0 353.6,265.0 393.0,256.0 432.4,247.0 471.8,238.0 511.1,229.0 550.5,220.0 589.9,211.0 629.2,202.0 668.6,193.0 708.0,184.0" fill="none" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
-<path d="M 328 474 h 24" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="360" y="478" font-size="12">성공 실측</text>
-<polyline points="117.4,318.7 156.8,308.7 196.1,300.8 235.5,291.5 274.9,283.1 314.2,274.2 353.6,265.0 393.0,257.4 432.4,248.6 471.8,240.2 511.1,231.6 550.5,222.3 589.9,213.0 629.2,203.5 668.6,193.7 708.0,185.0" fill="none" stroke="#1769aa" stroke-width="2"/>
-<path d="M 78 474 h 24" stroke="#1769aa" stroke-width="2"/>
-<text x="110" y="478" font-size="12">성공 이론 1+α/2</text>
-<polyline points="117.4,382.7 156.8,363.9 196.1,345.3 235.5,327.4 274.9,308.6 314.2,290.7 353.6,273.0 393.0,255.2 432.4,236.7 471.8,218.4 511.1,200.3 550.5,181.6 589.9,163.8 629.2,146.2 668.6,128.0 708.0,110.2" fill="none" stroke="#c62828" stroke-width="2"/>
-<path d="M 78 496 h 24" stroke="#c62828" stroke-width="2"/>
-<text x="110" y="500" font-size="12">실패 실측</text>
-<polyline points="117.4,382.0 156.8,364.0 196.1,346.0 235.5,328.0 274.9,310.0 314.2,292.0 353.6,274.0 393.0,256.0 432.4,238.0 471.8,220.0 511.1,202.0 550.5,184.0 589.9,166.0 629.2,148.0 668.6,130.0 708.0,112.0" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
-<path d="M 328 496 h 24" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="360" y="500" font-size="12">실패 이론 α</text>
+<text x="400" y="25" text-anchor="middle" font-size="18">체이닝 해시 테이블 탐색 비용</text>
+<path d="M 82 402.0 H 742" stroke="#ddd"/>
+<text x="70" y="406.0" text-anchor="end" font-size="12">0</text>
+<path d="M 82 314.5 H 742" stroke="#ddd"/>
+<text x="70" y="318.5" text-anchor="end" font-size="12">1</text>
+<path d="M 82 227.0 H 742" stroke="#ddd"/>
+<text x="70" y="231.0" text-anchor="end" font-size="12">2</text>
+<path d="M 82 139.5 H 742" stroke="#ddd"/>
+<text x="70" y="143.5" text-anchor="end" font-size="12">3</text>
+<path d="M 82 52.0 H 742" stroke="#ddd"/>
+<text x="70" y="56.0" text-anchor="end" font-size="12">4</text>
+<path d="M 82.0 52 V 402" stroke="#eee"/>
+<text x="82.0" y="422" text-anchor="middle" font-size="12">0.0</text>
+<path d="M 164.5 52 V 402" stroke="#eee"/>
+<text x="164.5" y="422" text-anchor="middle" font-size="12">0.5</text>
+<path d="M 247.0 52 V 402" stroke="#eee"/>
+<text x="247.0" y="422" text-anchor="middle" font-size="12">1.0</text>
+<path d="M 329.5 52 V 402" stroke="#eee"/>
+<text x="329.5" y="422" text-anchor="middle" font-size="12">1.5</text>
+<path d="M 412.0 52 V 402" stroke="#eee"/>
+<text x="412.0" y="422" text-anchor="middle" font-size="12">2.0</text>
+<path d="M 494.5 52 V 402" stroke="#eee"/>
+<text x="494.5" y="422" text-anchor="middle" font-size="12">2.5</text>
+<path d="M 577.0 52 V 402" stroke="#eee"/>
+<text x="577.0" y="422" text-anchor="middle" font-size="12">3.0</text>
+<path d="M 659.5 52 V 402" stroke="#eee"/>
+<text x="659.5" y="422" text-anchor="middle" font-size="12">3.5</text>
+<path d="M 742.0 52 V 402" stroke="#eee"/>
+<text x="742.0" y="422" text-anchor="middle" font-size="12">4.0</text>
+<path d="M 82 52 V 402 H 742" fill="none" stroke="#333"/>
+<text x="412.0" y="450" text-anchor="middle" font-size="14">적재율 α</text>
+<text x="18" y="227.0" text-anchor="middle" font-size="14" transform="rotate(-90 18 227.0)">평균 노드 탐색 횟수</text>
+<polyline points="123.2,302.5 164.5,292.1 205.8,280.8 247.0,271.1 288.2,260.5 329.5,248.9 370.8,238.4 412.0,227.4 453.2,216.5 494.5,205.9 535.8,195.4 577.0,184.6 618.2,173.6 659.5,162.7 700.8,151.6 742.0,140.9" fill="none" stroke="#1769aa" stroke-width="2"/>
+<path d="M 82 476 h 24" stroke="#1769aa" stroke-width="2"/>
+<text x="114" y="480" font-size="12">성공 실측</text>
+<polyline points="123.2,303.6 164.5,292.6 205.8,281.7 247.0,270.8 288.2,259.8 329.5,248.9 370.8,237.9 412.0,227.0 453.2,216.1 494.5,205.1 535.8,194.2 577.0,183.2 618.2,172.3 659.5,161.4 700.8,150.4 742.0,139.5" fill="none" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 382 476 h 24" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="414" y="480" font-size="12">성공 이론 1+α/2</text>
+<polyline points="123.2,380.1 164.5,357.7 205.8,335.9 247.0,314.2 288.2,292.0 329.5,270.3 370.8,248.7 412.0,226.5 453.2,204.8 494.5,183.0 535.8,161.3 577.0,139.8 618.2,117.8 659.5,96.2 700.8,74.3 742.0,52.7" fill="none" stroke="#c62828" stroke-width="2"/>
+<path d="M 82 498 h 24" stroke="#c62828" stroke-width="2"/>
+<text x="114" y="502" font-size="12">실패 실측</text>
+<polyline points="123.2,380.1 164.5,358.3 205.8,336.4 247.0,314.5 288.2,292.6 329.5,270.7 370.8,248.9 412.0,227.0 453.2,205.1 494.5,183.3 535.8,161.4 577.0,139.5 618.2,117.6 659.5,95.7 700.8,73.9 742.0,52.0" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 382 498 h 24" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="414" y="502" font-size="12">실패 이론 α</text>
+<text x="82" y="558" font-size="11">버킷 4093개 · 적재율당 5회 · 시드 2026 · 재현 가능한 무작위 URL</text>
 </svg>
