@@ -41,6 +41,18 @@ class HashTable(Generic[Value]):
     def _bucket_index(self, key: str) -> int:
         return self.hash_calculation(key)[1]
 
+    def probe_count(self, key: str) -> int:
+        """Count inspected nodes for a lookup, including the matching node."""
+        self._validate_key(key)
+        node = self._buckets[self._bucket_index(key)]
+        probes = 0
+        while node is not None:
+            probes += 1
+            if node.key == key:
+                return probes
+            node = node.next
+        return probes
+
     def __setitem__(self, key: str, value: Value) -> None:
         self._validate_key(key)
         index = self._bucket_index(key)
