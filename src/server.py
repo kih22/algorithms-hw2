@@ -9,6 +9,7 @@ from urllib.parse import parse_qsl, unquote, urlsplit
 from src.hash_table import HashTable
 from src.shortener import Shortener
 
+_DEFAULT_TABLE_CAPACITY = 10
 _MAX_FORM_BYTES = 1_048_576
 
 
@@ -21,7 +22,7 @@ def _page(title: str, content: str) -> str:
   <title>{html.escape(title)}</title>
   <style>
     body {{ font: 1rem/1.6 system-ui, sans-serif; margin: 2rem auto; max-width: 60rem; padding: 0 1rem; }}
-    input[type=url] {{ box-sizing: border-box; max-width: 38rem; padding: .6rem; width: 100%; }}
+    input[type=text] {{ box-sizing: border-box; max-width: 38rem; padding: .6rem; width: 100%; }}
     button {{ cursor: pointer; margin-top: .6rem; padding: .55rem 1rem; }}
     code {{ overflow-wrap: anywhere; }}
     .chain {{ align-items: flex-start; display: flex; flex-wrap: wrap; gap: .75rem; }}
@@ -46,7 +47,8 @@ def _form_page(message: str = "") -> str:
     content = f"""{notice}
 <form action="/shorten" method="post">
   <label for="url">줄일 URL</label><br>
-  <input id="url" name="url" type="url" placeholder="https://example.com" required>
+  <input id="url" name="url" type="text" placeholder="https://example.com 또는 example.com" required>
+  <p class="muted">http:// 또는 https://를 생략하면 https://를 붙입니다.</p>
   <br><button type="submit">줄이기</button>
 </form>"""
     return _page("URL 단축기", content)
@@ -108,8 +110,12 @@ class ShortenerServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-    def __init__(self, address: tuple[str, int], shortener: Shortener):
-        self.shortener = shortener
+    def __init__(self, address: tuple[str, int], shortener: Shortener | None = None):
+        self.shortener = (
+            shortener
+            if shortener is not None
+            else Shortener(table_capacity=_DEFAULT_TABLE_CAPACITY)
+        )
         super().__init__(address, ShortenerRequestHandler)
 
 
@@ -178,14 +184,26 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
         if len(urls) != 1:
             self._send_html(400, _form_page("URL을 하나 입력해 주세요."))
             return
+        url = urls[0].strip()
+        if url:
+            parsed_url = urlsplit(url)
+            if not parsed_url.scheme or "." in parsed_url.scheme or parsed_url.scheme == "localhost":
+                url = f"https://{url.lstrip('/')}"
         try:
-            code = self.server.shortener.shorten(urls[0])
+            code = self.server.shortener.shorten(url)
         except ValueError as error:
             self._send_html(400, _form_page(str(error)))
             return
 
+        short_path = f"/{html.escape(code)}"
+        original_url = html.escape(self.server.shortener.expand(code), quote=True)
         content = f"""<p>짧은 링크가 준비되었습니다.</p>
-<p><a id="short-link" href="/{html.escape(code)}">/{html.escape(code)}</a></p>
+<p>짧은 링크: <a id="short-link" href="{short_path}">{short_path}</a></p>
+<script>
+  const shortLink = document.getElementById("short-link");
+  shortLink.textContent = new URL(shortLink.href, window.location.origin).href;
+</script>
+<p>원래 주소: <a href="{original_url}" target="_blank" rel="noopener noreferrer">{original_url}</a></p>
 <p><a href="/">다른 URL 줄이기</a></p>"""
         self._send_html(200, _page("짧은 링크", content))
 
@@ -200,7 +218,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    server = ShortenerServer(("0.0.0.0", args.port), Shortener())
+    server = ShortenerServer(("0.0.0.0", args.port))
     print(f"URL 단축기 실행 중: http://0.0.0.0:{args.port}")
     try:
         server.serve_forever()
