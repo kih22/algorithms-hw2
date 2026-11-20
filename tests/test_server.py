@@ -32,6 +32,7 @@ class ServerTests(unittest.TestCase):
         status, _, page = self.request("GET", "/")
         self.assertEqual(status, 200)
         self.assertIn('action="/shorten"', page)
+        self.assertIn('type="text"', page)
 
         status, _, page = self.request(
             "POST",
@@ -41,9 +42,21 @@ class ServerTests(unittest.TestCase):
         )
         self.assertEqual(status, 200)
         self.assertIn('id="short-link" href="/0"', page)
+        self.assertIn("new URL(shortLink.href, window.location.origin)", page)
+        self.assertIn("원래 주소:", page)
         status, _, table = self.request("GET", "/table")
         self.assertEqual(status, 200)
         self.assertIn("https://example.com/a?x=&lt;tag&gt;&amp;y=2", table)
+
+    def test_bare_domain_is_shortened_with_https(self):
+        status, _, page = self.request(
+            "POST",
+            "/shorten",
+            urlencode({"url": "example.org/path"}),
+            {"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("https://example.org/path", page)
 
     def test_short_link_redirects_and_unknown_code_is_not_found(self):
         self.shortener.shorten("https://example.com/original")
@@ -77,6 +90,13 @@ class ServerTests(unittest.TestCase):
         self.assertIn("Horner 해시 계산 보기", page)
         self.assertIn("ord(", page)
         self.assertIn("버킷 인덱스", page)
+
+    def test_server_defaults_to_ten_buckets(self):
+        server = ShortenerServer(("127.0.0.1", 0))
+        try:
+            self.assertEqual(server.shortener.table.capacity, 10)
+        finally:
+            server.server_close()
 
 
 if __name__ == "__main__":
